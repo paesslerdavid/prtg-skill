@@ -1,0 +1,20 @@
+[
+  {
+    "id": "2491.0",
+    "name": "CPU Load",
+    "parentid": "2491",
+    "primary": true
+  },
+  {
+    "id": "2492.0",
+    "name": "Disk Free",
+    "parentid": "2492",
+    "primary": true
+  },
+  {
+    "id": "2493.0",
+    "name": "Connection Time",
+    "parentid": "2493",
+    "primary": true
+  }
+]

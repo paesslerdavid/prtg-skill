@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>PRTG Status Overview</title>
+  <link rel="stylesheet" href="spectrum.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: Roboto, "Segoe UI", Tahoma, Arial, Helvetica, Verdana, sans-serif;
+      background: var(--background-color-body, #F9F9FA);
+      color: var(--text-color-base, #31343F);
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; margin-bottom: 16px;
+    }
+    .title { color: var(--text-color-brand, #050F34); margin: 0; }
+    .meta { color: var(--text-color-alt, #686B76); font-size: 12px; }
+    .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+    .kpi {
+      background: var(--background-color-base, #FFFFFF);
+      border: 1px solid var(--border-color-alt, #DBDCDF);
+      border-radius: 8px; padding: 12px;
+    }
+    .kpi .value { font-size: 24px; font-weight: 700; color: var(--text-color-brand, #050F34); }
+    .kpi .label { font-size: 12px; color: var(--text-color-alt, #686B76); }
+    .panel {
+      background: var(--background-color-base, #FFFFFF);
+      border: 1px solid var(--border-color-alt, #DBDCDF);
+      border-radius: 8px; padding: 14px; margin-bottom: 16px;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th, td {
+      text-align: left; padding: 8px; font-size: 13px;
+      border-bottom: 1px solid var(--border-color-alt, #DBDCDF);
+    }
+    th { color: var(--text-color-brand, #050F34); background: var(--background-color-body, #F9F9FA); }
+    .status-pill {
+      display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600;
+    }
+    @media (max-width: 900px) {
+      .kpis { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div>
+        <h1 class="title">PRTG Status Overview</h1>
+        <div class="meta">Snapshot: {{SNAPSHOT_TIME}}</div>
+      </div>
+      <a href="{{BACK_LINK}}">Back to Overview</a>
+    </header>
+
+    <section class="kpis">
+      <article class="kpi"><div class="value">{{TOTAL_DEVICES}}</div><div class="label">Devices</div></article>
+      <article class="kpi"><div class="value">{{TOTAL_SENSORS}}</div><div class="label">Sensors</div></article>
+      <article class="kpi"><div class="value">{{DOWN_COUNT}}</div><div class="label">Down</div></article>
+      <article class="kpi"><div class="value">{{WARNING_COUNT}}</div><div class="label">Warning</div></article>
+    </section>
+
+    <section class="panel">
+      <h2>Problem List</h2>
+      <table>
+        <tr><th>Device</th><th>Sensor</th><th>Type</th><th>Status</th></tr>
+        {{PROBLEM_ROWS}}
+      </table>
+    </section>
+  </div>
+</body>
+</html>

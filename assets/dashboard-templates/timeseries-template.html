@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>PRTG Timeseries View</title>
+  <link rel="stylesheet" href="spectrum.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Roboto, "Segoe UI", Tahoma, Arial, Helvetica, Verdana, sans-serif;
+      background: var(--background-color-body, #F9F9FA);
+      color: var(--text-color-base, #31343F);
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    .header { margin-bottom: 14px; }
+    .title { margin: 0; color: var(--text-color-brand, #050F34); }
+    .meta { font-size: 12px; color: var(--text-color-alt, #686B76); }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .card {
+      background: var(--background-color-base, #FFFFFF);
+      border: 1px solid var(--border-color-alt, #DBDCDF);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .chart-wrap {
+      height: 260px;
+      overflow: hidden;
+      position: relative;
+    }
+    @media (max-width: 960px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1 class="title">PRTG Timeseries</h1>
+      <div class="meta">Window: {{WINDOW_LABEL}} | Snapshot: {{SNAPSHOT_TIME}}</div>
+    </header>
+    <section class="grid" id="chartGrid"></section>
+  </div>
+  <script>
+    const colors = ['#0F67FF', '#A4AD19', '#DE6800', '#0097B2', '#8A3FFC', '#D12771'];
+    const timeseriesPayload = {{TIMESERIES_JSON}};
+
+    function createChart(card, title, channels, rows) {
+      card.innerHTML = `<h3>${title}</h3><div class="chart-wrap"><canvas></canvas></div>`;
+      const canvas = card.querySelector("canvas");
+      const datasets = channels.map((channel, index) => ({
+        label: channel,
+        data: rows.map((row) => ({ x: new Date(row.datetime), y: row[channel] })),
+        borderColor: colors[index % colors.length],
+        backgroundColor: colors[index % colors.length] + '22',
+        borderWidth: 1.5,
+        pointRadius: 0,
+        tension: 0.25,
+        fill: false
+      }));
+
+      requestAnimationFrame(() => {
+        new Chart(canvas, {
+          type: 'line',
+          data: { datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            scales: {
+              x: { type: 'time', grid: { color: '#F1F1F3' } },
+              y: { grid: { color: '#F1F1F3' } }
+            }
+          }
+        });
+      });
+    }
+
+    const grid = document.getElementById("chartGrid");
+    Object.entries(timeseriesPayload).forEach(([title, config]) => {
+      const card = document.createElement("article");
+      card.className = "card";
+      grid.appendChild(card);
+      createChart(card, title, config.channels, config.rows);
+    });
+  </script>
+</body>
+</html>

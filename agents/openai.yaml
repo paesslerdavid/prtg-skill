@@ -1,0 +1,6 @@
+display_name: PRTG API v2
+short_description: Query and manage PRTG devices/sensors with v2-first workflows and Spectrum dashboards.
+default_prompt: >-
+  Work with PRTG Network Monitor via API v2. Use v2 endpoints by default,
+  apply known filtering and endpoint quirks, require dry-run planning before
+  write operations, and generate Spectrum-themed outputs when visualizations are requested.
