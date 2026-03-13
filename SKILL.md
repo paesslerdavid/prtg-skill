@@ -62,8 +62,12 @@ Read these files on-demand (they are large — only read what you need):
 - **`${CLAUDE_SKILL_DIR}/references/api-endpoints.md`** — All endpoint paths, HTTP methods, parameters, and response codes. Read this when you need to know what endpoints exist or their parameters.
 - **`${CLAUDE_SKILL_DIR}/references/api-filtering.md`** — Filter syntax, operators, filterable properties, enum values, and common pitfalls. Read this before constructing any `filter=` query.
 - **`${CLAUDE_SKILL_DIR}/references/api-schemas.md`** — Request/response body schemas with field names, types, and descriptions. Read this when you need to construct a request body or understand a response.
-- **`${CLAUDE_SKILL_DIR}/references/spectrum-design-system.md`** — Spectrum design token reference (colors, typography, spacing, status mappings). **Read this before generating any frontend/dashboard code.**
+- **`${CLAUDE_SKILL_DIR}/references/spectrum-design-system.md`** — Compact Spectrum token reference for static visualizations and dashboards.
+- **`${CLAUDE_SKILL_DIR}/references/spectrum-full-system.md`** — Full Spectrum component and interaction system for richer UI composition.
+- **`${CLAUDE_SKILL_DIR}/references/spectrum-visualization-guidelines.md`** — Decision guide for when to use compact vs full system, plus mandatory branding/look-and-feel rules.
 - **`${CLAUDE_SKILL_DIR}/references/visualization-patterns.md`** — Visualization module catalog with v2-first query plans and v1 fallback triggers. Read this for richer dashboards (heatmaps, timeline stacks, SLA bars, flap ranking, dependency views).
+- **`${CLAUDE_SKILL_DIR}/references/write-operations-playbook.md`** — Safe write workflow (dry-run planning, approvals, rollback patterns) for `POST/PATCH/DELETE`.
+- **`${CLAUDE_SKILL_DIR}/references/error-handling.md`** — HTTP error triage, retry/backoff rules, and v2-to-v1 fallback policy.
 
 ## Critical Gotchas & Lessons Learned
 
@@ -234,9 +238,28 @@ while True:
     offset += page_size
 ```
 
-## Dashboard / Frontend Guidelines
+## Safe Write Policy (Required)
 
-**Always read `${CLAUDE_SKILL_DIR}/references/spectrum-design-system.md` before generating any HTML/CSS.**
+Before executing any write operation (`POST`, `PATCH`, `DELETE`):
+
+1. Gather object IDs and current values first.
+2. Produce a dry-run plan showing endpoint, method, before/after fields, and object count.
+3. Require explicit user confirmation before applying writes.
+4. Execute writes in small batches.
+5. Re-read objects and report final state after completion.
+
+Use `${CLAUDE_SKILL_DIR}/references/write-operations-playbook.md` for full workflow and rollback patterns.
+
+## Visualization / Frontend Guidelines
+
+Support more than dashboards. Valid outputs include status dashboards, timeseries reports, sensor distribution charts, health timelines, topology-like overviews, SLA trend views, and compact NOC wallboard layouts.
+
+Before generating HTML/CSS:
+
+1. Read `${CLAUDE_SKILL_DIR}/references/spectrum-visualization-guidelines.md`.
+2. Choose the right system:
+   - Use `spectrum-design-system.md` for static/lightweight pages.
+   - Use `spectrum-full-system.md` for component-rich, interactive views.
 
 - Link `spectrum.css` (must be in the same directory as generated HTML):
   ```html
@@ -245,6 +268,10 @@ while True:
   Download with: `python3 ${CLAUDE_SKILL_DIR}/scripts/fetch_spectrum.py`
 - Use Spectrum design tokens via CSS custom properties (`var(--token-name)`)
 - Use semantic color tokens, not hardcoded hex values
+- Every visualization MUST include a PRTG-branded top header with:
+  - PRTG logo at top-left (inline SVG wordmark or local image asset)
+  - visualization title and snapshot timestamp
+  - optional context action (for example: "Back to Overview")
 - PRTG status → Spectrum color mapping:
   - UP → `fill-color-success` / `background-color-success-soft` (green)
   - DOWN → `fill-color-danger` / `background-color-danger-soft` (red)
@@ -252,6 +279,7 @@ while True:
   - PAUSED/UNKNOWN → `text-color-disabled` / `background-color-disabled` (grey)
 - Font stack: Roboto, "Segoe UI", Tahoma, Arial, Helvetica, Verdana, sans-serif
 - Base font size: 14px. Spacing unit: 4px multiples.
+- Use card surfaces, consistent spacing rhythm, and clear visual hierarchy (headline, summary KPIs, then details).
 
 ### Charts & Timeseries
 - Use **Chart.js via CDN** (`chart.js` + `chartjs-adapter-date-fns`). No build step required.
@@ -301,6 +329,31 @@ Common v1 fallback endpoints for visuals:
 - Object tables: `table.json?content=sensors|devices|groups&output=json`
 - Historic series: `historicdata.json?id=<sensorid>&avg=<seconds>&sdate=<start>&edate=<end>`
 
+## Bundled Assets & Fixture Mode
+
+- Dashboard templates:
+  - `${CLAUDE_SKILL_DIR}/assets/dashboard-templates/status-overview-template.html`
+  - `${CLAUDE_SKILL_DIR}/assets/dashboard-templates/timeseries-template.html`
+- Offline fixtures:
+  - `${CLAUDE_SKILL_DIR}/assets/fixtures/devices.sample.json`
+  - `${CLAUDE_SKILL_DIR}/assets/fixtures/sensors.sample.json`
+  - `${CLAUDE_SKILL_DIR}/assets/fixtures/channels.sample.json`
+  - `${CLAUDE_SKILL_DIR}/assets/fixtures/timeseries.sample.json`
+
+When a live server is unavailable, use fixture mode to produce deterministic demo output:
+
+```bash
+python3 "${CLAUDE_SKILL_DIR}/scripts/build_fixture_dashboard.py" --output fixture-dashboard.html
+```
+
+## Compatibility Notes
+
+- Runtime placeholders:
+  - `${CLAUDE_SKILL_DIR}` resolves to the installed skill directory.
+  - `$ARGUMENTS` resolves to the user task text.
+- For Codex-style environments where those placeholders are unavailable, resolve paths relative to the repository root and pass task text directly in the user prompt.
+- Keep scripts Python-first for Windows path safety (avoid shell `source` semantics).
+
 ## Scripts
 
 - **`${CLAUDE_SKILL_DIR}/scripts/update_docs.py`** — Refresh API docs from the live PRTG server. Run from your working directory (where the `*.env` file is). Outputs to `docs/` and `prtg_api_resolved.yaml` in the CWD.
@@ -311,6 +364,19 @@ Common v1 fallback endpoints for visuals:
   ```bash
   python3 "${CLAUDE_SKILL_DIR}/scripts/fetch_spectrum.py"
   ```
+- **`${CLAUDE_SKILL_DIR}/scripts/preflight.py`** — Verify credentials, v2 connectivity, filter syntax behavior, optional v1 fallback reachability, and local `spectrum.css` presence.
+  ```bash
+  python3 "${CLAUDE_SKILL_DIR}/scripts/preflight.py"
+  ```
+- **`${CLAUDE_SKILL_DIR}/scripts/build_fixture_dashboard.py`** — Build an offline HTML dashboard from local fixture JSON files.
+  ```bash
+  python3 "${CLAUDE_SKILL_DIR}/scripts/build_fixture_dashboard.py" --output fixture-dashboard.html
+  ```
+- **`${CLAUDE_SKILL_DIR}/scripts/validate_skill.py`** — Validate frontmatter, file references, and required repository assets.
+  ```bash
+  python3 "${CLAUDE_SKILL_DIR}/scripts/validate_skill.py"
+  ```
+- **`${CLAUDE_SKILL_DIR}/scripts/prtg_client.py`** — Shared helper client for pagination, v1 fallback reads, and safe credential handling. Import from custom scripts instead of rewriting API glue.
 
 ---
 

@@ -1,0 +1,47 @@
+[
+  {
+    "id": "40",
+    "name": "Core Router",
+    "status": "SUMMED_INFO_UP",
+    "parent": {
+      "id": "10",
+      "name": "HQ Network"
+    },
+    "sensor_status_summary": {
+      "total": 12,
+      "up": 10,
+      "down": 1,
+      "warning": 1
+    }
+  },
+  {
+    "id": "42",
+    "name": "Web Cluster Node 1",
+    "status": "SUMMED_INFO_DOWN",
+    "parent": {
+      "id": "12",
+      "name": "Production Servers"
+    },
+    "sensor_status_summary": {
+      "total": 9,
+      "up": 5,
+      "down": 3,
+      "warning": 1
+    }
+  },
+  {
+    "id": "43",
+    "name": "SQL Primary",
+    "status": "SUMMED_INFO_WARNING",
+    "parent": {
+      "id": "12",
+      "name": "Production Servers"
+    },
+    "sensor_status_summary": {
+      "total": 8,
+      "up": 6,
+      "down": 0,
+      "warning": 2
+    }
+  }
+]
