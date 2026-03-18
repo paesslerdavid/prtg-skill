@@ -1,0 +1,58 @@
+[
+  {
+    "id": "2490",
+    "name": "Ping",
+    "kind_name": "Ping v2",
+    "status": "UP",
+    "parentid": "40",
+    "parent": {
+      "id": "40",
+      "name": "Core Router"
+    },
+    "last_measurement": {
+      "display_value": 2.1
+    }
+  },
+  {
+    "id": "2491",
+    "name": "CPU Load",
+    "kind_name": "SNMP CPU Load",
+    "status": "WARNING",
+    "parentid": "42",
+    "parent": {
+      "id": "42",
+      "name": "Web Cluster Node 1"
+    },
+    "last_measurement": {
+      "display_value": 88.0
+    }
+  },
+  {
+    "id": "2492",
+    "name": "Disk Free",
+    "kind_name": "SNMP Disk Free",
+    "status": "DOWN",
+    "parentid": "42",
+    "parent": {
+      "id": "42",
+      "name": "Web Cluster Node 1"
+    },
+    "last_measurement": {
+      "display_value": 4.0
+    }
+  },
+  {
+    "id": "2493",
+    "name": "SQL Connection Time",
+    "kind_name": "SQL v2",
+    "status": "UP",
+    "parentid": "43",
+    "parent": {
+      "id": "43",
+      "name": "SQL Primary"
+    },
+    "last_measurement": {
+      "display_value": 12.7
+    }
+  }
+]

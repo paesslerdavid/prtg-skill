@@ -1,6 +1,6 @@
 # prtg-skill — Claude Code Skill for PRTG Network Monitor
 
-A Claude Code skill for working with **PRTG Network Monitor** via the PRTG API v2. Includes endpoint references, filter syntax docs, schema references, Spectrum design system guidelines, and utility scripts.
+A Claude Code skill for working with **PRTG Network Monitor** via the PRTG API v2. Includes endpoint references, filter syntax docs, schema references, Spectrum visualization guidelines, and utility scripts.
 
 ## What This Skill Does
 
@@ -8,9 +8,11 @@ When you run `/prtg <task>`, Claude will:
 - Load your PRTG credentials from a `.env` file in the current directory
 - Query the PRTG API v2 using the correct endpoint paths, filter syntax, and auth patterns
 - Apply all known API quirks and gotchas automatically
-- Generate Spectrum-themed HTML dashboards when asked
+- Enforce safe-write workflow for `POST/PATCH/DELETE` (dry-run plan first, explicit confirmation before execution)
+- Generate Spectrum-themed visualizations (dashboards, charts, timelines, and summary views) when asked
 - Offer richer visualization presets (heatmaps, timeline stacks, SLA bars, flap ranking, dependency views)
 - Use API v1 only as a targeted fallback when required by endpoint/version gaps
+- Support offline fixture mode for deterministic demos when no live PRTG server is available
 
 ## Install
 
@@ -53,6 +55,14 @@ cp -r prtg-skill ~/.claude/skills/prtg
 
    This downloads `spectrum.css` into your current directory. Generated HTML dashboards will link to it for consistent Paessler styling.
 
+4. *(Recommended)* **Run preflight checks** before a session:
+
+   ```bash
+   python3 ~/.claude/skills/prtg/scripts/preflight.py
+   ```
+
+   This validates credentials, v2 connectivity, filter behavior, optional v1 fallback reachability, and local `spectrum.css` availability.
+
 ## Usage
 
 Once the skill is installed, start any PRTG-related task with `/prtg`:
@@ -61,9 +71,11 @@ Once the skill is installed, start any PRTG-related task with `/prtg`:
 /prtg how many devices and sensors are there?
 /prtg show me all sensors that are currently down
 /prtg build a status dashboard for group 53
+/prtg build a sensor status heatmap by device group
 /prtg create a ping sensor named "Uptime Check" on device 42
 /prtg rename sensor 2490 to "Web Server Response Time"
 /prtg build a timeseries chart for sensors 2490, 2491, and 2492
+/prtg build a topology-style overview of probe health and cross-site links
 ```
 
 ## What's Included
@@ -76,14 +88,45 @@ prtg-skill/
 │   ├── api-endpoints.md             ← All 115 operations: paths, params, response codes
 │   ├── api-filtering.md             ← Filter syntax, operators, filterable properties
 │   ├── api-schemas.md               ← Request/response body schemas
-│   ├── spectrum-design-system.md    ← Paessler design tokens for dashboard styling
-│   └── visualization-patterns.md    ← Visualization module catalog + v2/v1 fallback strategy
+│   ├── spectrum-design-system.md    ← Compact Spectrum token reference for static visualizations
+│   ├── spectrum-full-system.md      ← Full Spectrum component system for richer UI patterns
+│   ├── spectrum-visualization-guidelines.md ← When to use each + mandatory branding/look-and-feel
+│   ├── visualization-patterns.md    ← Visualization module catalog + v2/v1 fallback strategy
+│   ├── write-operations-playbook.md ← Dry-run, confirmation, rollback workflow for writes
+│   └── error-handling.md            ← HTTP failure triage, retry rules, fallback policy
+├── assets/
+│   ├── dashboard-templates/         ← Reusable Spectrum HTML templates
+│   └── fixtures/                    ← Offline sample payloads for deterministic demos/tests
+├── agents/
+│   └── openai.yaml                  ← UI metadata (display name, short description, default prompt)
 └── scripts/
     ├── update_docs.py               ← Refresh API docs from live PRTG server
-    └── fetch_spectrum.py            ← Download spectrum.css from PRTG server
+    ├── fetch_spectrum.py            ← Download spectrum.css from PRTG server
+    ├── prtg_client.py               ← Shared client helper for env loading, pagination, and v1 fallback
+    ├── preflight.py                 ← Session readiness checks
+    ├── build_fixture_dashboard.py   ← Build offline HTML dashboard from fixture JSON
+    └── validate_skill.py            ← Validate skill references and required files
 ```
 
 The reference docs are a snapshot from a PRTG QA instance. Run `update_docs.py` to regenerate them for your specific PRTG version.
+
+## Offline Fixture Mode
+
+Use this when live API access is unavailable:
+
+```bash
+python3 ~/.claude/skills/prtg/scripts/build_fixture_dashboard.py --output fixture-dashboard.html
+```
+
+The script reads sample JSON from `assets/fixtures/` and writes a static dashboard for demos and CI checks.
+
+## Validation
+
+Validate local skill integrity:
+
+```bash
+python3 ~/.claude/skills/prtg/scripts/validate_skill.py
+```
 
 ## Requirements
 
