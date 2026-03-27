@@ -93,7 +93,8 @@ prtg-skill/
 │   ├── spectrum-visualization-guidelines.md ← When to use each + mandatory branding/look-and-feel
 │   ├── visualization-patterns.md    ← Visualization module catalog + v2/v1 fallback strategy
 │   ├── write-operations-playbook.md ← Dry-run, confirmation, rollback workflow for writes
-│   └── error-handling.md            ← HTTP failure triage, retry rules, fallback policy
+│   ├── error-handling.md            ← HTTP failure triage, retry rules, fallback policy
+│   └── sensor-creation-guide.md     ← Sensor creation workflow, metascan, POST body gotchas
 ├── assets/
 │   ├── dashboard-templates/         ← Reusable Spectrum HTML templates
 │   └── fixtures/                    ← Offline sample payloads for deterministic demos/tests
@@ -138,4 +139,4 @@ python3 ~/.claude/skills/prtg/scripts/validate_skill.py
 
 - **`spectrum.css` is not bundled** — licensing is uncertain. Use `fetch_spectrum.py` to download it from your own PRTG server, or copy it from the PRTG installation directory (`C:\Program Files (x86)\PRTG Network Monitor\webroot\`).
 - The skill is **v2-first**. API v1 may be used only as a narrow fallback for unsupported visualization data paths.
-- Auto-invocation is disabled (`disable-model-invocation: true`) — you must explicitly type `/prtg`.
+- Auto-invocation is enabled — Claude will use this skill automatically for PRTG-related tasks, or you can explicitly type `/prtg`.
